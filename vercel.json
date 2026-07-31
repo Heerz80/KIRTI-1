@@ -3,13 +3,10 @@
   "builds": [
     {
       "src": "web/**",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "web"
-      }
+      "use": "@vercel/static"
     },
     {
-      "src": "api/**",
+      "src": "api/index.py",
       "use": "@vercel/python"
     }
   ],
