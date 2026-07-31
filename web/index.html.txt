@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Kirti - School OS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial; background: #f5f7fa; padding: 20px; }
+    .container { max-width: 800px; margin: auto; }
+    .header { background: #1A3C6E; color: white; padding: 30px; border-radius: 16px; text-align: center; }
+    .card { background: white; padding: 24px; border-radius: 12px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .card h2 { color: #1A3C6E; margin-bottom: 12px; }
+    .btn { background: #F4A261; color: white; padding: 10px 24px; border: none; border-radius: 8px; cursor: pointer; }
+    .btn.blue { background: #1A3C6E; }
+    .online { background: #d4edda; color: #155724; padding: 8px 16px; border-radius: 20px; }
+    .offline { background: #f8d7da; color: #721c24; padding: 8px 16px; border-radius: 20px; }
+    #studentList { list-style: none; padding: 0; margin-top: 12px; }
+    #studentList li { padding: 8px 0; border-bottom: 1px solid #eee; }
+    .footer { text-align: center; padding: 20px; color: #888; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🏫 Kirti</h1>
+    <p>Nepal's School OS</p>
+  </div>
+  <div class="card">
+    <h2>🔌 Backend Status</h2>
+    <button class="btn" onclick="checkAPI()">Check API</button>
+    <div id="apiStatus" style="margin-top:12px;"></div>
+  </div>
+  <div class="card">
+    <h2>👨‍🎓 Students</h2>
+    <p id="studentCount">Total: 0</p>
+    <button class="btn blue" onclick="addStudent()">➕ Add Student</button>
+    <button class="btn" onclick="loadStudents()">🔄 Refresh</button>
+    <ul id="studentList"></ul>
+  </div>
+  <div class="footer">
+    <p><a href="https://github.com/Heerz80/Kirti">View on GitHub</a></p>
+  </div>
+</div>
+<script>
+const API_URL = 'http://localhost:8000';
+async function checkAPI() {
+  const statusDiv = document.getElementById('apiStatus');
+  try {
+    const response = await fetch(`${API_URL}/`);
+    const data = await response.json();
+    statusDiv.innerHTML = `<span class="online">✅ Online</span> Version: ${data.version}`;
+  } catch (error) {
+    statusDiv.innerHTML = `<span class="offline">❌ Offline</span><br>Run: cd C:\\kirti\\backend && python main.py`;
+  }
+}
+async function loadStudents() {
+  const list = document.getElementById('studentList');
+  const count = document.getElementById('studentCount');
+  try {
+    const response = await fetch(`${API_URL}/api/students`);
+    const data = await response.json();
+    const students = data.students || [];
+    count.textContent = `Total: ${students.length}`;
+    list.innerHTML = students.length === 0 ? '<li>No students</li>' : students.map(s => `<li>🆔 ${s.id} - ${s.name} (Grade ${s.grade})</li>`).join('');
+  } catch (error) {
+    list.innerHTML = '<li style="color:red;">Error loading</li>';
+  }
+}
+async function addStudent() {
+  const name = prompt('Student name:');
+  if (!name) return;
+  const grade = prompt('Grade:');
+  if (!grade) return;
+  await fetch(`${API_URL}/api/students?name=${encodeURIComponent(name)}&grade=${encodeURIComponent(grade)}`, { method: 'POST' });
+  alert('✅ Added!');
+  loadStudents();
+}
+window.onload = function() { checkAPI(); loadStudents(); };
+</script>
+</body>
+</html>
